@@ -525,7 +525,16 @@ public class ShareService {
         } else if (share.getType() == 4) {
             storage = new Local(share);
         } else if (share.getType() == 5) {
-            storage = new QuarkShare(share);
+            // 修改开始：尝试获取 QuarkTV 账号
+            DriverAccount account = driverAccountRepository.findByTypeAndMasterTrue(DriverType.QUARK_TV).orElse(null);
+            if (account != null) {
+                // 如果存在 QuarkTV 主账号，使用带账号的构造函数
+                storage = new QuarkShare(share, account);
+            } else {
+                // 否则使用原有逻辑（依赖 API 回调获取 Cookie）
+                storage = new QuarkShare(share);
+            }
+            // 修改结束
         } else if (share.getType() == 7) {
             storage = new UCShare(share);
         } else if (share.getType() == 9) {
